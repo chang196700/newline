@@ -1,0 +1,74 @@
+{
+    "name": "newline",
+    "displayName": "NewLine",
+    "description": "Whenever you save a file, this extension will automatically add a blank line at its end, if there isn't one already. If you have multiple blank lines, only one will be kept.",
+    "version": "0.0.1",
+    "author": {
+        "name": "Chang Feng"
+    },
+    "publisher": "chang196700",
+    "license": "MIT",
+    "repository": "https://github.com/chang196700/newline",
+    "engines": {
+        "vscode": "^1.44.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onCommand:newline.checkNewline",
+        "onCommand:workbench.action.files.save"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [{
+            "command": "newline.checkNewline",
+            "title": "NewLine: Check Newline"
+        }],
+        "configuration": {
+            "title": "object",
+            "properties": {
+                "newline.fileExtensionsToIgnore": {
+                    "type": "array",
+                    "items": {
+                        "allOf": [{
+                            "type": "string"
+                        }]
+                    },
+                    "default": [
+                        ".conf",
+                        ".json",
+                        ".liquid"
+                    ],
+                    "description": "List of file extensions to which blank lines should not be added."
+                },
+                "newline.ignoreOnlyNewlinesFile": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Ignore files only have newlines"
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "yarn run compile",
+        "compile": "tsc -p ./",
+        "lint": "eslint src --ext ts",
+        "watch": "tsc -watch -p ./",
+        "pretest": "yarn run compile && yarn run lint",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.44.0",
+        "@types/glob": "^7.1.1",
+        "@types/mocha": "^7.0.2",
+        "@types/node": "^13.11.0",
+        "eslint": "^6.8.0",
+        "@typescript-eslint/parser": "^2.26.0",
+        "@typescript-eslint/eslint-plugin": "^2.26.0",
+        "glob": "^7.1.6",
+        "mocha": "^7.1.1",
+        "typescript": "^3.8.3",
+        "vscode-test": "^1.3.0"
+    }
+}
