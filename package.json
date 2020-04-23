@@ -8,7 +8,14 @@
     },
     "publisher": "chang196700",
     "license": "MIT",
-    "repository": "https://github.com/chang196700/newline",
+    "homepage": "https://github.com/chang196700/newline",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/chang196700/newline.git"
+    },
+    "bugs": {
+        "url": "https://github.com/chang196700/newline/issues"
+    },
     "engines": {
         "vscode": "^1.44.0"
     },
