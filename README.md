@@ -21,6 +21,6 @@ Submit the [issues](https://github.com/chang196700/newline/issues) if you find a
 
 ## Release Notes
 
-### 0.0.1
+### v0.0.1
 
 Initial release.
