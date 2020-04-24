@@ -2,7 +2,7 @@
     "name": "newline",
     "displayName": "NewLine",
     "description": "Whenever you save a file, this extension will automatically add a blank line at its end, if there isn't one already. If you have multiple blank lines, only one will be kept.",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "author": {
         "name": "Chang Feng"
     },
