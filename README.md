@@ -1,6 +1,6 @@
 # Newline
 
-![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/chang196700.newline) ![Azure DevOps builds](https://img.shields.io/azure-devops/build/chang196700/VSCode%20Extensions/1?label=Azure%20DevOps%20build)
+[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/chang196700.newline)](https://marketplace.visualstudio.com/items?itemName=chang196700.newline) [![Azure DevOps builds](https://img.shields.io/azure-devops/build/chang196700/VSCode%20Extensions/1?label=Azure%20DevOps%20build)](https://dev.azure.com/chang196700/VSCode%20Extensions/_build/latest?definitionId=1&branchName=master)
 
 ## Features
 
