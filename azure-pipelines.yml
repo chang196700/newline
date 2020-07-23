@@ -9,36 +9,119 @@ trigger:
   tags:
     include: ['*']
 
-strategy:
-  matrix:
-    linux:
-      imageName: 'ubuntu-latest'
+stages:
+- stage: BuildAndTest
+  displayName: Build and Test
 
-pool:
-  vmImage: $(imageName)
+  jobs:
+  - job: BuildAndTest
+    strategy:
+      matrix:
+        linux:
+          imageName: 'ubuntu-latest'
+    pool:
+      vmImage: $(imageName)
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '10.x'
-  displayName: 'Install Node.js'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '10.x'
+      displayName: 'Install Node.js'
 
-- bash: |
-    /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-    echo ">>> Started xvfb"
-  displayName: Start xvfb
-  condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
+    - bash: |
+        /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        echo ">>> Started xvfb"
+      displayName: Start xvfb
+      condition: and(succeeded(), eq(variables['Agent.OS'], 'Linux'))
 
-- bash: |
-    echo ">>> Compile vscode-test"
-    yarn && yarn compile && yarn test
-    echo ">>> Compiled vscode-test"
-  displayName: Run Tests
-  env:
-    DISPLAY: ':99.0'
+    - bash: |
+        echo ">>> Compile newline"
+        yarn && yarn compile && yarn test
+        echo ">>> Compiled newline"
+      displayName: Run Tests
+      env:
+        DISPLAY: ':99.0'
 
-- bash: |
-    echo ">>> Publish"
-    yarn deploy -p $(VSCODE_MARKETPLACE_TOKEN)
-  displayName: Publish
-  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), eq(variables['Agent.OS'], 'Linux'))
+- stage: Package
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
+  jobs:
+  - job: PackageRelease
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    steps:
+      - checkout: self
+        submodules: true
+      
+      - task: NodeTool@0
+        inputs:
+          versionSpec: '10.x'
+        displayName: 'Install Node.js'
+
+      - bash: |
+          echo ">>> Package newline"
+          yarn && yarn run package
+        displayName: Package
+
+      - task: CopyFiles@2
+        inputs:
+          Contents: '*.vsix'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          ArtifactName: 'release'
+          publishLocation: 'Container'
+
+- stage: DeployMarketplace
+  displayName: 'Deploy to Marketplace'
+  dependsOn: [Package]
+  jobs:
+  - deployment: DeployMarketplaceProduction
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: 'Production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: release
+          - bash: |
+              sudo yarn global add vsce
+              PACKAGE_FILENAME=$(find $(Pipeline.Workspace) -type f -name "*.vsix")
+              vsce publish --yarn -p $MARKET_KEY --packagePath $PACKAGE_FILENAME
+            env:
+              MARKET_KEY: $(VSCODE_MARKETPLACE_TOKEN)
+
+- stage: DeployGithub
+  displayName: 'Deploy to Github'
+  dependsOn: [Package]
+  jobs:
+  - deployment: DeployGithubRelease
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: 'Github'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - download: current
+            artifact: release
+          - bash: |
+              PACKAGE_FILENAME=$(find $(Pipeline.Workspace) -type f -name "*.vsix")
+              echo ">>>> FILENAME"
+              echo "$PACKAGE_FILENAME"
+              echo "$(Build.SourceVersion)"
+          - task: GitHubRelease@1
+            inputs:
+              gitHubConnection: 'release'
+              repositoryName: '$(Build.Repository.Name)'
+              action: create
+              target: $(Build.SourceVersion)
+              tagSource: gitTag
+              releaseNotesSource: inline
+              isPreRelease: true
+              addChangeLog: false
+              assets: $(Pipeline.Workspace)/release/*.vsix
