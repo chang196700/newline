@@ -123,5 +123,5 @@ stages:
               tagSource: 'gitTag'
               releaseNotesSource: 'inline'
               assets: '$(Pipeline.Workspace)/release/*.vsix'
-              isPreRelease: true
+              isPreRelease: false
               addChangeLog: false
