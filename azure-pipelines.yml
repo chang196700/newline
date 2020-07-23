@@ -116,12 +116,12 @@ stages:
               echo "$(Build.SourceVersion)"
           - task: GitHubRelease@1
             inputs:
-              gitHubConnection: 'release'
+              gitHubConnection: 'Github-PAT-chang196700'
               repositoryName: '$(Build.Repository.Name)'
-              action: create
-              target: $(Build.SourceVersion)
-              tagSource: gitTag
-              releaseNotesSource: inline
+              action: 'create'
+              target: '$(Build.SourceVersion)'
+              tagSource: 'gitTag'
+              releaseNotesSource: 'inline'
+              assets: '$(Pipeline.Workspace)/release/*.vsix'
               isPreRelease: true
               addChangeLog: false
-              assets: $(Pipeline.Workspace)/release/*.vsix
