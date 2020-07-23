@@ -60,7 +60,7 @@ stages:
 
       - bash: |
           echo ">>> Package newline"
-          yarn && vsce package
+          yarn && yarn vsce package
         displayName: Package
 
       - task: CopyFiles@2
