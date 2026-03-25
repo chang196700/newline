@@ -2,35 +2,76 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - master
+
+permissions:
+  contents: write
 
 jobs:
-  package:
+  version:
     runs-on: ubuntu-latest
-    
+    outputs:
+      new_version: ${{ steps.calc.outputs.new_version }}
+      new_version_number: ${{ steps.calc.outputs.new_version_number }}
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+      with:
+        fetch-depth: 0
+
+    - name: Calculate next version
+      id: calc
+      run: |
+        LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+        if [ -z "$LATEST_TAG" ]; then
+          LATEST_TAG="v0.0.0"
+        fi
+        echo "Latest tag: $LATEST_TAG"
+        VERSION=${LATEST_TAG#v}
+        MAJOR=$(echo "$VERSION" | cut -d. -f1)
+        MINOR=$(echo "$VERSION" | cut -d. -f2)
+        PATCH=$(echo "$VERSION" | cut -d. -f3)
+        NEW_VERSION="v${MAJOR}.${MINOR}.$((PATCH + 1))"
+        NEW_VERSION_NUMBER="${MAJOR}.${MINOR}.$((PATCH + 1))"
+        echo "New version: $NEW_VERSION"
+        echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+        echo "new_version_number=$NEW_VERSION_NUMBER" >> "$GITHUB_OUTPUT"
+
+    - name: Create and push tag
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git tag ${{ steps.calc.outputs.new_version }}
+        git push origin ${{ steps.calc.outputs.new_version }}
+
+  package:
+    needs: version
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'yarn'
-        
+
     - name: Install dependencies
       run: yarn install --frozen-lockfile
-      
+
     - name: Compile
       run: yarn run compile
-      
+
     - name: Install vsce
       run: yarn global add @vscode/vsce
-      
+
     - name: Package extension
-      run: vsce package --yarn
-      
+      run: vsce package ${{ needs.version.outputs.new_version_number }} --no-update-package-json --yarn
+
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
@@ -39,37 +80,38 @@ jobs:
         retention-days: 30
 
   deploy-marketplace:
-    needs: package
+    needs: [version, package]
     runs-on: ubuntu-latest
     environment: production
-    
+
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
         name: vsix-package
-        
+
     - name: Install vsce
       run: npm install -g @vscode/vsce
-      
+
     - name: Publish to marketplace
       run: vsce publish --packagePath *.vsix
       env:
         VSCE_PAT: ${{ secrets.VSCODE_MARKETPLACE_TOKEN }}
 
   deploy-github:
-    needs: package
+    needs: [version, package]
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Download artifact
       uses: actions/download-artifact@v4
       with:
         name: vsix-package
-        
+
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v2
       with:
+        tag_name: ${{ needs.version.outputs.new_version }}
         files: '*.vsix'
         generate_release_notes: true
       env:
