@@ -1,6 +1,5 @@
 # NewLine
 
-[![Visual Studio Marketplace Version](https://img.shields.io/visual-studio-marketplace/v/chang196700.newline)](https://marketplace.visualstudio.com/items?itemName=chang196700.newline)
 [![CI](https://github.com/chang196700/newline/actions/workflows/ci.yml/badge.svg)](https://github.com/chang196700/newline/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
