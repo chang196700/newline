@@ -17,7 +17,7 @@
         "url": "https://github.com/chang196700/newline/issues"
     },
     "engines": {
-        "vscode": "^1.118.0"
+        "vscode": "^1.30.0"
     },
     "categories": [
         "Other"
@@ -104,7 +104,7 @@
         "@semantic-release/github": "^12.0.6",
         "@semantic-release/npm": "^13.1.5",
         "@types/node": "^20.19.39",
-        "@types/vscode": "^1.118.0",
+        "@types/vscode": "^1.30.0",
         "@typescript-eslint/eslint-plugin": "^8.59.2",
         "@typescript-eslint/parser": "^8.59.2",
         "@vscode/vsce": "3.9.1",
