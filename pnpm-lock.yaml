@@ -9,40 +9,40 @@ importers:
   .:
     devDependencies:
       '@semantic-release/changelog':
-        specifier: ^6.0.3
+        specifier: 6.0.3
         version: 6.0.3(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/exec':
-        specifier: ^7.1.0
+        specifier: 7.1.0
         version: 7.1.0(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/github':
-        specifier: ^12.0.6
+        specifier: 12.0.6
         version: 12.0.6(semantic-release@25.0.3(typescript@5.9.3))
       '@semantic-release/npm':
-        specifier: ^13.1.5
+        specifier: 13.1.5
         version: 13.1.5(semantic-release@25.0.3(typescript@5.9.3))
       '@types/node':
-        specifier: ^20.19.39
+        specifier: 20.19.39
         version: 20.19.39
       '@types/vscode':
-        specifier: ^1.118.0
-        version: 1.118.0
+        specifier: 1.30.0
+        version: 1.30.0
       '@typescript-eslint/eslint-plugin':
-        specifier: ^8.59.2
+        specifier: 8.59.2
         version: 8.59.2(@typescript-eslint/parser@8.59.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)
       '@typescript-eslint/parser':
-        specifier: ^8.59.2
+        specifier: 8.59.2
         version: 8.59.2(eslint@9.39.4)(typescript@5.9.3)
       '@vscode/vsce':
         specifier: 3.9.1
         version: 3.9.1
       eslint:
-        specifier: ^9.39.4
+        specifier: 9.39.4
         version: 9.39.4
       semantic-release:
-        specifier: ^25.0.3
+        specifier: 25.0.3
         version: 25.0.3(typescript@5.9.3)
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
 
 packages:
@@ -393,8 +393,8 @@ packages:
   '@types/sarif@2.1.7':
     resolution: {integrity: sha512-kRz0VEkJqWLf1LLVN4pT1cg1Z9wAuvI6L97V3m2f5B76Tg8d413ddvLBPTEHAZJlnn4XSvu0FkZtViCQGVyrXQ==}
 
-  '@types/vscode@1.118.0':
-    resolution: {integrity: sha512-Ah6eTlqDcwIMELEVwQMO++rJAFBRz/oLluLD/vWdYrH1KuI9kfpaM+7pg0OvvascgcJy+ghLCERAYouM4QbzGw==}
+  '@types/vscode@1.30.0':
+    resolution: {integrity: sha512-xRas+PW/fM/MoonB+Pawg48bGTjCqJsFUFwZpH/q2oW80AMHGDAUTUqySBnqeQ18e/SNi7NOCf3ZkYOzKm3Pqw==}
 
   '@typescript-eslint/eslint-plugin@8.59.2':
     resolution: {integrity: sha512-j/bwmkBvHUtPNxzuWe5z6BEk3q54YRyGlBXkSsmfoih7zNrBvl5A9A98anlp/7JbyZcWIJ8KXo/3Tq/DjFLtuQ==}
@@ -2893,7 +2893,7 @@ snapshots:
 
   '@types/sarif@2.1.7': {}
 
-  '@types/vscode@1.118.0': {}
+  '@types/vscode@1.30.0': {}
 
   '@typescript-eslint/eslint-plugin@8.59.2(@typescript-eslint/parser@8.59.2(eslint@9.39.4)(typescript@5.9.3))(eslint@9.39.4)(typescript@5.9.3)':
     dependencies:
