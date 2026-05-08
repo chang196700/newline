@@ -87,6 +87,17 @@ When set to `true` (the default), files whose entire content consists only of ne
 
 Found a bug or have a suggestion? Please [open an issue](https://github.com/chang196700/newline/issues).
 
+## Contributing
+
+```bash
+pnpm install       # install dependencies (requires Node.js with corepack enabled)
+pnpm run compile   # compile TypeScript
+pnpm run lint      # run linter
+pnpm run test      # run tests (requires a display; set DISPLAY=:99.0 on Linux)
+```
+
+Commit messages must follow [Conventional Commits](https://www.conventionalcommits.org/) — releases are automated via Semantic Release.
+
 ## Credits
 
 Inspired by [vsCodeBlankLine](https://github.com/riccardoNovaglia/vsCodeBlankLine).
