@@ -1,3 +1,12 @@
+# [1.0.0](https://github.com/chang196700/newline/compare/v0.0.7...v1.0.0) (2026-05-08)
+
+
+### Bug Fixes
+
+* **ci:** remove persist-credentials to allow git push in successCmd ([323b2fa](https://github.com/chang196700/newline/commit/323b2fa6f84d2f106a1a70400235af9728c6fc3b))
+* **release:** use conventionalcommits preset to support feat! breaking change syntax ([4dd50e0](https://github.com/chang196700/newline/commit/4dd50e011aa1738f1cc65354db598db136e4a1ba))
+* remove pnpm version override to use packageManager from package.json ([773c42c](https://github.com/chang196700/newline/commit/773c42c0cae0f2d044fff49a0d0d4e53a7d936f4))
+
 # Change Log
 
 All notable changes to the "newline" extension will be documented in this file.
