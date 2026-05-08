@@ -1,6 +1,64 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ]
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [
+		"config:best-practices",
+		":pinAllExceptPeerDependencies",
+		":timezone(Asia/Shanghai)",
+		":enableVulnerabilityAlertsWithLabel(security)",
+		":automergeBranch",
+		":prHourlyLimit2",
+		":prConcurrentLimit10",
+		":rebaseStalePrs",
+		":separateMultipleMajorReleases",
+		"schedule:earlyMondays",
+		"group:allNonMajor",
+		"group:linters",
+		"group:test",
+		"security:minimumReleaseAgeNpm",
+		"helpers:disableTypesNodeMajor",
+		"workarounds:typesNodeVersioning"
+	],
+	"minimumReleaseAge": "14 days",
+	"internalChecksFilter": "strict",
+	"labels": ["dependencies"],
+	"reviewersFromCodeOwners": true,
+	"packageRules": [
+		{
+			"description": "Major bumps need explicit cooldown and review",
+			"matchUpdateTypes": ["major"],
+			"minimumReleaseAge": "30 days",
+			"addLabels": ["major-bump"],
+			"automerge": false,
+			"dependencyDashboardApproval": true
+		},
+		{
+			"description": "TypeScript major bumps require extra coordination",
+			"matchPackageNames": ["typescript"],
+			"matchUpdateTypes": ["major"],
+			"minimumReleaseAge": "60 days"
+		},
+		{
+			"description": "Pin @types/vscode to engines.vscode floor; only manual bumps",
+			"matchPackageNames": ["@types/vscode"],
+			"matchUpdateTypes": ["major", "minor"],
+			"enabled": false
+		},
+		{
+			"description": "Node.js — only Active LTS even-major lines",
+			"matchManagers": ["nodenv"],
+			"matchPackageNames": ["node"],
+			"allowedVersions": "/^(?:22|24|26)\\./"
+		},
+		{
+			"description": "pnpm via packageManager — auto-merge patches once aged",
+			"matchDepNames": ["pnpm"],
+			"matchUpdateTypes": ["patch"],
+			"automerge": true
+		},
+		{
+			"description": "VS Code platform grouping",
+			"matchPackageNames": ["@vscode/vsce", "@vscode/test-electron"],
+			"groupName": "vscode platform"
+		}
+	]
 }
