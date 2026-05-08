@@ -9,36 +9,35 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        node-version: [18, 20]
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
-    - name: Setup Node.js ${{ matrix.node-version }}
+
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'yarn'
-        
+        node-version-file: .node-version
+        cache: pnpm
+
     - name: Install dependencies
-      run: yarn install --frozen-lockfile
-      
+      run: pnpm install --frozen-lockfile
+
     - name: Compile TypeScript
-      run: yarn run compile
-      
+      run: pnpm run compile
+
     - name: Run linter
-      run: yarn run lint
-      
+      run: pnpm run lint
+
     - name: Setup Xvfb
       run: |
         /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         echo "Started xvfb"
-        
+
     - name: Run tests
-      run: yarn run test
+      run: pnpm run test
       env:
         DISPLAY: ':99.0'

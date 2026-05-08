@@ -91,11 +91,11 @@
         }
     },
     "scripts": {
-        "vscode:prepublish": "yarn run compile",
+        "vscode:prepublish": "pnpm run compile",
         "compile": "tsc -p ./",
         "lint": "eslint src",
         "watch": "tsc -watch -p ./",
-        "pretest": "yarn run compile && yarn run lint",
+        "pretest": "pnpm run compile && pnpm run lint",
         "test": "node ./out/test/runTest.js",
         "package": "vsce package --no-dependencies -o dist/",
         "release:dry-run": "semantic-release --dry-run"
@@ -118,5 +118,5 @@
         "semantic-release": "^25.0.3",
         "typescript": "^5.6.3"
     },
-    "packageManager": "yarn@4.13.0+sha512.5c20ba010c99815433e5c8453112165e673f1c7948d8d2b267f4b5e52097538658388ebc9f9580656d9b75c5cc996f990f611f99304a2197d4c56d21eea370e7"
+    "packageManager": "pnpm@11.0.8+sha512.4c4097e1dd2d42372c4e7fa5a791ff28fc75a484c7ac192e64b1df0fdef17594ba982f9b4fed9adfb3c757846f565b799b2763fb3733d1de1bcb82cf46684912"
 }

@@ -6,7 +6,7 @@
 		["@semantic-release/changelog", { "changelogFile": "CHANGELOG.md" }],
 		["@semantic-release/npm", { "npmPublish": false }],
 		["@semantic-release/exec", {
-			"prepareCmd": "mkdir -p dist && yarn run package && git add CHANGELOG.md package.json && (git diff --cached --quiet || git commit -m \"chore(release): ${nextRelease.version} [skip ci]\")",
+			"prepareCmd": "mkdir -p dist && pnpm run package && git add CHANGELOG.md package.json && (git diff --cached --quiet || git commit -m \"chore(release): ${nextRelease.version} [skip ci]\")",
 			"publishCmd": "vsce publish --no-dependencies --packagePath dist/newline-${nextRelease.version}.vsix"
 		}],
 		["@semantic-release/exec", {
