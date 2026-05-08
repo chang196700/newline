@@ -1,6 +1,6 @@
 # NewLine — Agent Instructions
 
-VS Code extension that ensures every saved file ends with exactly one blank line.  
+VS Code extension that ensures every saved file ends with exactly one blank line.
 Publisher: `chang196700.newline` · Marketplace: https://marketplace.visualstudio.com/items?itemName=chang196700.newline
 
 ## Key Files
@@ -25,7 +25,7 @@ pnpm run release:dry-run  # semantic-release dry run
 
 ## Release Process
 
-Releases are fully automated via [Semantic Release](.releaserc.json) on every push to `master`.  
+Releases are fully automated via [Semantic Release](.releaserc.json) on every push to `master`.
 Commit messages **must** follow [Conventional Commits](https://www.conventionalcommits.org/):
 - `fix:` → patch version
 - `feat:` → minor version
