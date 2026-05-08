@@ -1,5 +1,6 @@
 # NewLine
 
+[![GitHub Release](https://img.shields.io/github/v/release/chang196700/newline)](https://github.com/chang196700/newline/releases)
 [![CI](https://github.com/chang196700/newline/actions/workflows/ci.yml/badge.svg)](https://github.com/chang196700/newline/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
