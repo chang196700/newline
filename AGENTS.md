@@ -18,14 +18,14 @@ Publisher: `chang196700.newline` · Marketplace: https://marketplace.visualstudi
 pnpm install          # install deps (uses corepack pnpm@11)
 pnpm run compile      # tsc → out/
 pnpm run lint         # eslint src/
-pnpm run test         # requires a display (CI sets DISPLAY=:99.0 via Xvfb)
+pnpm run test         # compile + Node.js regression tests (no display required)
 pnpm run package      # produces dist/newline-<version>.vsix
 pnpm run release:dry-run  # semantic-release dry run
 ```
 
 ## Release Process
 
-Releases are fully automated via [Semantic Release](.releaserc.json) on every push to `master`.
+Releases are automated via [Semantic Release](.releaserc.json) on pushes to `master` after lint and tests pass. Only release-worthy commits create a version. `@semantic-release/git` commits generated version/changelog files; do not bump versions or add upcoming changelog entries manually.
 Commit messages **must** follow [Conventional Commits](https://www.conventionalcommits.org/):
 - `fix:` → patch version
 - `feat:` → minor version
@@ -37,6 +37,7 @@ Commit messages **must** follow [Conventional Commits](https://www.conventionalc
 - `NewLine` class hooks `onWillSaveTextDocument` to run synchronously before save using `waitUntil`.
 - Logic counts trailing EOL sequences (`\n` or `\r\n`) and emits a single `TextEdit` to normalise to exactly one.
 - Ignore rules checked in `checkFileExtNeedIgnore()`: extension suffix match first, then regex rules (`basename` or `fullName` mode).
+- Optional `ignoreSourceControlledFiles` save guard compares the editor's ending with the Git index via `src/sourceControl.ts`; manual commands bypass it.
 - Configuration namespace: `newline.*` (see [README.md](README.md#configuration) for all settings).
 
 ## Conventions

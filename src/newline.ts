@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { hasUnchangedTrackedEnding } from './sourceControl';
 
 declare type FileRegex = {
     type: string,
@@ -13,14 +14,30 @@ export class NewLine {
 		this.onWillSaveTextDocumentDisposable = vscode.workspace.onWillSaveTextDocument((e) => {
 			const doc = e.document;
 			if (this.checkFileExtNeedIgnore(doc)) {return;}
-			this.checkNewLine(doc, (start, end, replace) => {
-				e.waitUntil(new Promise((resolve, reject) => {
-					const range = new vscode.Range(start, end);
-					const edit = new vscode.TextEdit(range, replace);
-					resolve([ edit ]);
-				}));
-			});
+			// waitUntil must be called during event dispatch, before awaiting Git.
+			e.waitUntil(this.getSaveEdits(doc));
 		}, null);
+	}
+
+	async getSaveEdits(doc: vscode.TextDocument): Promise<vscode.TextEdit[]> {
+		const edits: vscode.TextEdit[] = [];
+		this.checkNewLine(doc, (start, end, replace) => {
+			edits.push(new vscode.TextEdit(new vscode.Range(start, end), replace));
+		});
+		if (edits.length === 0 || !vscode.workspace.getConfiguration('newline', doc.uri)
+			.get<boolean>('ignoreSourceControlledFiles', false)) {return edits;}
+		const version = doc.version;
+		let timer: ReturnType<typeof setTimeout> | undefined;
+		try {
+			// Stay below VS Code's shared save-participant time budget.
+			const ignore = await Promise.race([
+				hasUnchangedTrackedEnding(doc),
+				new Promise<boolean>(resolve => {timer = setTimeout(() => resolve(false), 500);})
+			]);
+			return ignore || doc.isClosed || doc.version !== version ? [] : edits;
+		} finally {
+			if (timer !== undefined) {clearTimeout(timer);}
+		}
 	}
 
 	checkNewLine (doc: vscode.TextDocument, executor: (start: vscode.Position, end: vscode.Position, replace: string) => void) {

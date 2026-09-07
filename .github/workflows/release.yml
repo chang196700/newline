@@ -3,6 +3,11 @@ name: Release
 on:
   push:
     branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -12,7 +17,9 @@ permissions:
 jobs:
   release:
     name: Semantic Release
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -31,11 +38,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Compile
-        run: pnpm run compile
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Test
+        run: pnpm run test
 
       - name: Release
-        run: pnpm exec semantic-release
+        run: pnpm run release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VSCE_PAT: ${{ secrets.VSCE_PAT }}

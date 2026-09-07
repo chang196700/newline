@@ -6,10 +6,18 @@ on:
   pull_request:
     branches: [ master, main ]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -26,8 +34,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Compile
-        run: pnpm run compile
+      - name: Test
+        run: pnpm run test
 
       - name: Lint
         run: pnpm run lint
+
+      - name: Package
+        run: pnpm run package

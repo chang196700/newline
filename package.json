@@ -35,8 +35,14 @@
             }
         ],
         "configuration": {
-            "title": "object",
+            "title": "NewLine",
             "properties": {
+                "newline.ignoreSourceControlledFiles": {
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "resource",
+                    "description": "On save, skip Git-tracked files when the last non-empty line and trailing newlines are unchanged from the index (staging area). Requires the built-in Git extension."
+                },
                 "newline.ignoreOnlyNewlinesFile": {
                     "type": "boolean",
                     "default": true,
@@ -94,15 +100,20 @@
         "vscode:prepublish": "pnpm run compile",
         "compile": "tsc -p ./",
         "lint": "eslint src",
+        "test": "pnpm run compile && node --test test/*.test.js",
         "watch": "tsc -watch -p ./",
-        "package": "vsce package --no-dependencies -o dist/",
+        "package": "node -e \"require('node:fs').mkdirSync('dist', { recursive: true })\" && vsce package --no-dependencies -o dist/",
+        "release": "semantic-release",
         "release:dry-run": "semantic-release --dry-run"
     },
     "devDependencies": {
         "@semantic-release/changelog": "6.0.3",
+        "@semantic-release/commit-analyzer": "13.0.1",
         "@semantic-release/exec": "7.1.0",
+        "@semantic-release/git": "10.0.1",
         "@semantic-release/github": "12.0.6",
         "@semantic-release/npm": "13.1.5",
+        "@semantic-release/release-notes-generator": "14.1.1",
         "@types/node": "20.19.39",
         "@types/vscode": "1.30.0",
         "@typescript-eslint/eslint-plugin": "8.59.2",

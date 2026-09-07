@@ -2,17 +2,21 @@
 	"branches": ["master"],
 	"plugins": [
 		["@semantic-release/commit-analyzer", { "preset": "conventionalcommits" }],
-		"@semantic-release/release-notes-generator",
-		["@semantic-release/changelog", { "changelogFile": "CHANGELOG.md" }],
+		["@semantic-release/release-notes-generator", { "preset": "conventionalcommits" }],
+		["@semantic-release/changelog", { "changelogFile": "CHANGELOG.md", "changelogTitle": "# Changelog" }],
 		["@semantic-release/npm", { "npmPublish": false }],
 		["@semantic-release/exec", {
-			"prepareCmd": "mkdir -p dist && pnpm run package && git add CHANGELOG.md package.json && (git diff --cached --quiet || git commit -m \"chore(release): ${nextRelease.version} [skip ci]\")",
+			"prepareCmd": "pnpm run package",
 			"publishCmd": "vsce publish --no-dependencies --packagePath dist/newline-${nextRelease.version}.vsix"
 		}],
-		["@semantic-release/exec", {
-			"successCmd": "git push origin HEAD:${branch.name}"
+		["@semantic-release/git", {
+			"assets": ["CHANGELOG.md", "package.json", "pnpm-lock.yaml"],
+			"message": "chore(release): ${nextRelease.version} [skip ci]"
 		}],
 		["@semantic-release/github", {
+			"successComment": false,
+			"failComment": false,
+			"failTitle": false,
 			"assets": [{ "path": "dist/*.vsix", "label": "VS Code Extension (.vsix)" }]
 		}]
 	]
