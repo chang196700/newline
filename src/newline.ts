@@ -9,6 +9,7 @@ declare type FileRegex = {
 
 export class NewLine {
 	onWillSaveTextDocumentDisposable: vscode.Disposable;
+	private readonly warnedInvalidRegexes = new Set<string>();
 
 	constructor () {
 		this.onWillSaveTextDocumentDisposable = vscode.workspace.onWillSaveTextDocument((e) => {
@@ -79,7 +80,19 @@ export class NewLine {
         const extIgnored = this.getFileExtensionsToIgnore().find(p => doc.fileName.endsWith(p)) !== undefined;
         if (extIgnored) {return true;};
         const regexIgnored = this.getFileRegexToIgnore().find(p => {
-            let reg = new RegExp(p.regex);
+            let reg: RegExp;
+            try {
+                reg = new RegExp(p.regex);
+            } catch {
+                // Invalid user patterns must not interrupt the save listener.
+                if (!this.warnedInvalidRegexes.has(p.regex)) {
+                    this.warnedInvalidRegexes.add(p.regex);
+                    void vscode.window.showWarningMessage(
+                        `NewLine: Invalid regular expression ${JSON.stringify(p.regex)} in newline.fileRegexToIgnore. This rule is skipped; please correct it in Settings.`
+                    );
+                }
+                return false;
+            }
             return p.type === "basename"
                 ? reg.test(path.basename(doc.fileName))
                 : reg.test(doc.fileName);

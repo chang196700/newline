@@ -6,6 +6,8 @@ const path = require('node:path');
 let enabled = true;
 let extension;
 let saveListener;
+let regexRules = [];
+const warnings = [];
 class Position {
     constructor(line, character) { Object.assign(this, { line, character }); }
 }
@@ -19,9 +21,17 @@ const vscode = {
     Position, Range, TextEdit,
     EndOfLine: { LF: 1, CRLF: 2 },
     extensions: { getExtension: () => extension },
+    window: {
+        showWarningMessage: message => {
+            warnings.push(message);
+            // The save listener must not wait for the user to dismiss the warning.
+            return new Promise(() => {});
+        }
+    },
     workspace: {
         getConfiguration: () => ({ get: (key, fallback) =>
-            key === 'ignoreSourceControlledFiles' ? enabled : fallback }),
+            key === 'fileRegexToIgnore' ? regexRules :
+                key === 'ignoreSourceControlledFiles' ? enabled : fallback }),
         onWillSaveTextDocument: listener => {
             saveListener = listener;
             return { dispose() {} };
@@ -35,6 +45,39 @@ Module._load = function (id, ...args) {
 const { NewLine } = require('../out/newline');
 Module._load = originalLoad;
 const newline = new NewLine();
+
+test('invalid regex rules do not interrupt saves or prevent later ignore matches', async () => {
+    enabled = false;
+    try {
+        regexRules = [{ type: 'basename', regex: '[' }];
+        let pending;
+        saveListener({ document: document('last'), waitUntil: value => { pending = value; } });
+        assert.ok(pending instanceof Promise);
+        assert.equal((await pending).length, 1);
+        assert.equal(warnings.length, 1);
+        assert.ok(warnings[0].includes('newline.fileRegexToIgnore'));
+        assert.ok(warnings[0].includes('"["'));
+
+        for (const rule of [
+            { type: 'basename', regex: '^file\\.txt$' },
+            { type: 'fullName', regex: 'fixture[/\\\\]file\\.txt$' }
+        ]) {
+            regexRules = [{ type: 'basename', regex: '[' }, rule];
+            saveListener({
+                document: document('last'),
+                waitUntil: () => assert.fail('matching ignore rule must skip save edits')
+            });
+        }
+        assert.equal(warnings.length, 1, 'repeated saves must not repeat the warning');
+        regexRules = [{ type: 'basename', regex: '(' }];
+        saveListener({ document: document('last'), waitUntil: value => { pending = value; } });
+        assert.equal((await pending).length, 1);
+        assert.equal(warnings.length, 2, 'a different invalid pattern needs its own warning');
+        assert.ok(warnings[1].includes('"("'));
+    } finally {
+        regexRules = [];
+    }
+});
 
 function document(text) {
     const lines = text.split(/\r\n|\n/);

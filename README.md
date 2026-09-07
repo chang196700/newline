@@ -59,6 +59,8 @@ List of file extensions to skip. The check is a simple suffix match on the full 
 
 ### `newline.fileRegexToIgnore`
 
+When an invalid regular expression is encountered during a save, NewLine shows a warning identifying the pattern and this setting. Each invalid pattern is reported only once per window session. The invalid rule is skipped; other ignore rules and normal save processing continue without waiting for the warning to be dismissed.
+
 Each entry is an object with two fields:
 
 | Field | Values | Description |
