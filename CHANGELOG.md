@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.1](https://github.com/chang196700/newline/compare/v1.1.0...v1.1.1) (2026-09-07)
+
+### Bug Fixes
+
+* activate at startup to observe initial automatic saves ([fbdfa8b](https://github.com/chang196700/newline/commit/fbdfa8b69dd7bff13dddae34e47a19ce8a7f4b35))
+* handle manual command without an active editor ([f0da38c](https://github.com/chang196700/newline/commit/f0da38c797b3c42814376c8dd8e70b119aaf94d5))
+* warn once and skip invalid ignore regex patterns ([3841ce4](https://github.com/chang196700/newline/commit/3841ce435f3062abc3306375cbd8c901ac91c11b))
+
+### Performance Improvements
+
+* inspect file endings without full-document scans ([73120b5](https://github.com/chang196700/newline/commit/73120b53b8fac3536a0fa566a04e3a66f3b81c15))
+
 ## [1.1.0](https://github.com/chang196700/newline/compare/v1.0.0...v1.1.0) (2026-09-07)
 
 ### Features
