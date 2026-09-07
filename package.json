@@ -23,8 +23,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onCommand:newline.checkNewline",
-        "onCommand:workbench.action.files.save"
+        "*"
     ],
     "main": "./out/extension.js",
     "contributes": {
