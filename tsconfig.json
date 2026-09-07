@@ -1,6 +1,7 @@
 {
 	"compilerOptions": {
-		"module": "commonjs",
+		"module": "Node16",
+		"types": ["node", "vscode"],
 		"target": "es6",
 		"outDir": "out",
 		"lib": [
