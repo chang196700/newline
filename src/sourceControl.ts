@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { documentEnding, textEnding } from './fileEnding';
 
 // Minimal subset of the built-in Git extension's version 1 API.
 interface GitRepository {
@@ -9,14 +10,6 @@ interface GitRepository {
 
 interface GitExtension {
     getAPI(version: 1): { repositories: GitRepository[] };
-}
-
-function fileEnding(text: string): string {
-    // Git may store LF while the editor uses CRLF (core.autocrlf).
-    const normalized = text.replace(/\r\n/g, '\n');
-    const contentEnd = normalized.replace(/\n+$/, '').length;
-    if (contentEnd === 0) {return normalized;}
-    return normalized.slice(normalized.lastIndexOf('\n', contentEnd - 1) + 1);
 }
 
 export async function hasUnchangedTrackedEnding(doc: vscode.TextDocument): Promise<boolean> {
@@ -35,7 +28,10 @@ export async function hasUnchangedTrackedEnding(doc: vscode.TextDocument): Promi
         if (!repository) {return false;}
         // An empty ref reads the index. Untracked files have no index entry.
         const original = await repository.show('', doc.uri.fsPath);
-        return fileEnding(original) === fileEnding(doc.getText());
+        const indexed = textEnding(original);
+        const current = documentEnding(doc);
+        return indexed.content === current.content
+            && indexed.trailingNewlines === current.trailingNewlines;
     } catch {
         // Missing index entries, disabled Git and repository errors fall back
         // to the existing newline behavior without preventing the save.

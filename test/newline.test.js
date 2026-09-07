@@ -7,6 +7,7 @@ let enabled = true;
 let extension;
 let saveListener;
 let regexRules = [];
+let ignoreOnlyNewlines = true;
 const warnings = [];
 class Position {
     constructor(line, character) { Object.assign(this, { line, character }); }
@@ -31,6 +32,7 @@ const vscode = {
     workspace: {
         getConfiguration: () => ({ get: (key, fallback) =>
             key === 'fileRegexToIgnore' ? regexRules :
+                key === 'ignoreOnlyNewlinesFile' ? ignoreOnlyNewlines :
                 key === 'ignoreSourceControlledFiles' ? enabled : fallback }),
         onWillSaveTextDocument: listener => {
             saveListener = listener;
@@ -86,7 +88,7 @@ function document(text) {
         uri: { scheme: 'file', fsPath: path.resolve('fixture/file.txt') },
         isUntitled: false, isClosed: false, version: 1,
         eol: text.includes('\r\n') ? 2 : 1,
-        getText: () => text, lineCount: lines.length,
+        getText: () => { throw new Error('must not read the entire document'); }, lineCount: lines.length,
         lineAt: i => ({ text: lines[i] })
     };
 }
@@ -210,4 +212,90 @@ test('existing newline cleanup produces correct LF and CRLF edits', async () => 
     }
     assert.deepEqual(await newline.getSaveEdits(document('')), []);
     assert.deepEqual(await newline.getSaveEdits(document('\n\n')), []);
+});
+
+test('tail edits preserve empty, whitespace and newline-only file behavior', async () => {
+    enabled = false;
+    try {
+        for (const eol of ['\n', '\r\n']) {
+            for (const ignore of [true, false]) {
+                ignoreOnlyNewlines = ignore;
+                for (const [input, expected] of [
+                    ['', ''],
+                    [eol, ignore ? eol : ''],
+                    [eol.repeat(3), ignore ? eol.repeat(3) : ''],
+                    ['hello', `hello${eol}`],
+                    [`hello${eol}`, `hello${eol}`],
+                    [`hello${eol.repeat(3)}`, `hello${eol}`],
+                    [`hello${eol} \t`, `hello${eol} \t${eol}`],
+                    [`hello${eol} \t${eol.repeat(2)}`, `hello${eol} \t${eol}`]
+                ]) {
+                    const doc = document(input);
+                    doc.eol = eol === '\n' ? 1 : 2;
+                    const edits = await newline.getSaveEdits(doc);
+                    assert.ok(edits.length <= 1);
+                    let actual = input;
+                    if (edits.length) {
+                        const lines = input.split(eol);
+                        const offset = pos => {
+                            assert.ok(pos.line >= 0 && pos.line < lines.length);
+                            assert.ok(pos.character >= 0 && pos.character <= lines[pos.line].length);
+                            return lines.slice(0, pos.line).reduce((n, line) => n + line.length + eol.length, 0)
+                                + pos.character;
+                        };
+                        const edit = edits[0];
+                        actual = input.slice(0, offset(edit.range.start)) + edit.newText
+                            + input.slice(offset(edit.range.end));
+                    }
+                    assert.equal(actual, expected);
+                }
+            }
+        }
+    } finally {
+        ignoreOnlyNewlines = true;
+    }
+});
+
+test('Git tail comparison handles mixed EOLs, lone CR, newline-only and long lines', async () => {
+    const longLine = 'x'.repeat(100000);
+    try {
+        ignoreOnlyNewlines = false;
+        for (const [original, current, unchanged] of [
+            ['body\r\nlast\n\r\n', 'edited\nlast\n\n', true],
+            ['body\nlast\r', 'edited\nlast\r', true],
+            ['body\nlast\r', 'edited\nlast', false],
+            ['\r\n\n\r\n', '\n\n\n', true],
+            ['\r\n\n', '\n\n\n', false],
+            ['', '\n\n', false],
+            [`body\n${longLine}`, `edited\n${longLine}`, true],
+            [`body\n${longLine}`, `edited\n${longLine}y`, false]
+        ]) {
+            git(original);
+            assert.equal((await newline.getSaveEdits(document(current))).length, unchanged ? 0 : 1);
+        }
+    } finally {
+        ignoreOnlyNewlines = true;
+    }
+});
+
+test('ordinary and Git saves visit only the tail regardless of body line count', async () => {
+    for (const useGit of [false, true]) {
+        const counts = [];
+        for (const bodyLines of [10, 1000000]) {
+            git('old body\nlast\n\n');
+            enabled = useGit;
+            const doc = document('last\n\n');
+            let calls = 0;
+            doc.lineCount = bodyLines + 3;
+            doc.lineAt = line => {
+                calls++;
+                assert.ok(line >= bodyLines, 'must not visit body lines');
+                return { text: line === bodyLines ? 'last' : '' };
+            };
+            assert.equal((await newline.getSaveEdits(doc)).length, useGit ? 0 : 1);
+            counts.push(calls);
+        }
+        assert.equal(counts[0], counts[1]);
+        assert.ok(counts[0] <= 6);
+    }
 });

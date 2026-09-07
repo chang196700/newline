@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { hasUnchangedTrackedEnding } from './sourceControl';
+import { documentEnding } from './fileEnding';
 
 declare type FileRegex = {
     type: string,
@@ -45,34 +46,17 @@ export class NewLine {
 		if (doc.isUntitled) {
 			return;
 		}
-		const text = doc.getText();
-		if (text.length === 0) {
-			return;
-		}
+		const ending = documentEnding(doc);
 		const eolStr = doc.eol === vscode.EndOfLine.LF ? '\n' : '\r\n';
-		const removeEOLPatter = `(${eolStr})+$`;
-		const textLength = text.length;
-		const textWithoutEolLength = text.replace(new RegExp(removeEOLPatter), '').length;
-		const eolCounts = (textLength - textWithoutEolLength) / eolStr.length;
-		const lineCount = doc.lineCount;
-
-		if (textWithoutEolLength === 0 && this.getIgnoreOnlyNewlinesFile()) {return;}
-
-		if (textWithoutEolLength === 0 || eolCounts === 0 || eolCounts > 1) {
-			let start: vscode.Position;
-			let end: vscode.Position;
-			let replace: string;
-			start = new vscode.Position(lineCount - 1, doc.lineAt(lineCount - 1).text.length);
-			end = new vscode.Position(lineCount - 1, doc.lineAt(lineCount - 1).text.length);
-			replace = eolStr;
-			if (textWithoutEolLength === 0) {
-				start = new vscode.Position(0, doc.lineAt(0).text.length);
-				replace = '';
-			} else if (eolCounts > 1) {
-				start = new vscode.Position(lineCount - eolCounts, doc.lineAt(lineCount - eolCounts).text.length);
-				replace = '';
-			}
-			executor(start, end, replace);
+		if (ending.contentLine === -1) {
+			if (ending.trailingNewlines === 0 || this.getIgnoreOnlyNewlinesFile()) {return;}
+			executor(new vscode.Position(0, 0), new vscode.Position(doc.lineCount - 1, 0), '');
+		} else if (ending.trailingNewlines === 0) {
+			const end = new vscode.Position(ending.contentLine, ending.content.length);
+			executor(end, end, eolStr);
+		} else if (ending.trailingNewlines > 1) {
+			executor(new vscode.Position(ending.contentLine + 1, 0),
+				new vscode.Position(doc.lineCount - 1, 0), '');
 		}
 	}
 

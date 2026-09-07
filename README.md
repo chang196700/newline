@@ -28,6 +28,8 @@ ext install chang196700.newline
 
 The extension activates automatically. Every time you save a file, it checks and fixes the trailing newline.
 
+Newline checks inspect lines backward from the end instead of reading the whole document. Work depends on the trailing empty lines and the final content line; newline-only files and very long final lines can still require substantial processing. With Git protection enabled, comparison also examines only the ending, although the Git API still returns the complete index version of the file.
+
 To trigger a check manually, open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and run:
 
 ```

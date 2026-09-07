@@ -47,7 +47,7 @@ test('manual command still inserts a missing newline in the active editor', () =
         document: {
             isUntitled: false,
             eol: vscode.EndOfLine.LF,
-            getText: () => 'hello',
+            getText: () => { throw new Error('must not read the entire document'); },
             lineCount: 1,
             lineAt: () => ({ text: 'hello' })
         },
@@ -61,4 +61,35 @@ test('manual command still inserts a missing newline in the active editor', () =
         range: new Range(new Position(0, 5), new Position(0, 5)),
         text: '\n'
     }]);
+});
+
+test('manual command visits only the tail of a large document', () => {
+    const counts = [];
+    for (const bodyLines of [10, 1000000]) {
+        let calls = 0;
+        const edits = [];
+        vscode.window.activeTextEditor = {
+            document: {
+                isUntitled: false, eol: vscode.EndOfLine.LF,
+                getText: () => { throw new Error('must not read the entire document'); },
+                lineCount: bodyLines + 3,
+                lineAt: line => {
+                    calls++;
+                    assert.ok(line >= bodyLines);
+                    return { text: line === bodyLines ? 'hello' : '' };
+                }
+            },
+            edit: callback => {
+                callback({ replace: (range, text) => edits.push({ range, text }) });
+                return Promise.resolve(true);
+            }
+        };
+        command();
+        assert.deepEqual(edits, [{
+            range: new Range(new Position(bodyLines + 1, 0), new Position(bodyLines + 2, 0)),
+            text: ''
+        }]);
+        counts.push(calls);
+    }
+    assert.deepEqual(counts, [3, 3]);
 });
