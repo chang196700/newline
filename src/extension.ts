@@ -11,10 +11,10 @@ export function activate(context: vscode.ExtensionContext) {
 	// The commandId parameter must match the command field in package.json
 	let newline = new NewLine();
 	let disposable = vscode.commands.registerCommand('newline.checkNewline', () => {
-		let editor = vscode.window.activeTextEditor;
-		if (editor === null) {return;}
-		newline.checkNewLine(editor!.document, (start, end, replace) => {
-			editor?.edit((editBuilder) => {
+		const editor = vscode.window.activeTextEditor;
+		if (!editor) {return;}
+		newline.checkNewLine(editor.document, (start, end, replace) => {
+			editor.edit((editBuilder) => {
 				editBuilder.replace(new vscode.Range(start, end), replace);
 			});
 		});
